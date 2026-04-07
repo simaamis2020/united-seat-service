@@ -10,3 +10,4 @@
 [UDC-2] Add pricing tier filtering based on customer auth token
 [UDC-4] Add unit tests for SeatMapController — 87% coverage achieved
 [UDC-9] Add integration tests for seat hold and release lifecycle
+[UDC-3] Add Solace event consumer for seat inventory topic
