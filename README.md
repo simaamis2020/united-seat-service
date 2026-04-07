@@ -6,4 +6,4 @@
 [UDC-7] Add Redis persistence layer for seat hold state
 [UDC-10] Add Redis cluster config for dev and staging environments
 [UDC-8] Fix: Apply URL decoding before flightId parsing
-
+[UDC-2] Implement GET /v2/flights/{flightId}/seatmap endpoint
