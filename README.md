@@ -12,3 +12,4 @@
 [UDC-9] Add integration tests for seat hold and release lifecycle
 [UDC-3] Add Solace event consumer for seat inventory topic
 [UDC-11] Add consumer API documentation draft — seat map v2
+[UDC-3] Add dead letter queue handler for malformed inventory events
