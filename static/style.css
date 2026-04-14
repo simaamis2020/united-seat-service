@@ -306,6 +306,33 @@ body {
   color: #003087;
 }
 
+/* Utility */
+.hidden {
+  display: none !important;
+}
+
+/* Legend dot colors */
+.legend-dot.legend-polaris {
+  background: #c9a84c;
+}
+
+.legend-dot.legend-economy-plus {
+  background: #3b82f6;
+}
+
+.legend-dot.legend-available {
+  background: #22c55e;
+}
+
+.legend-dot.legend-taken {
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+}
+
+.legend-dot.legend-selected {
+  background: #003087;
+}
+
 /* Seat column headers */
 .seat-headers {
   display: flex;
