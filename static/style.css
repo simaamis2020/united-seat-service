@@ -1,0 +1,327 @@
+/* United Seat Service — Seat Selection UI */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f4f8;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: #003087;
+  color: white;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.header .flight-info {
+  margin-left: auto;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+/* Main layout */
+.container {
+  display: flex;
+  gap: 32px;
+  padding: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 20px;
+  padding: 12px 32px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 13px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+/* Seat map */
+.seat-map-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  flex: 1;
+}
+
+.seat-map-container h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #003087;
+}
+
+.cabin-label {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 6px 0;
+  margin: 8px 0 4px;
+  border-radius: 4px;
+}
+
+.cabin-label.polaris {
+  background: #1a1a2e;
+  color: #c9a84c;
+}
+
+.cabin-label.economy-plus {
+  background: #003087;
+  color: white;
+}
+
+.cabin-label.economy {
+  background: #e8f0fe;
+  color: #003087;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  gap: 4px;
+}
+
+.row-number {
+  width: 28px;
+  text-align: right;
+  font-size: 11px;
+  color: #888;
+  margin-right: 8px;
+}
+
+.aisle {
+  width: 20px;
+}
+
+/* Seats */
+.seat {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px 8px 4px 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: transform 0.1s, box-shadow 0.1s;
+  position: relative;
+}
+
+.seat:hover:not(.taken) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.seat.available {
+  background: #22c55e;
+  color: white;
+}
+
+.seat.taken {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.seat.selected {
+  background: #003087;
+  color: white;
+  box-shadow: 0 0 0 3px #93c5fd;
+  transform: translateY(-2px);
+}
+
+.seat.polaris.available {
+  background: #c9a84c;
+  color: #1a1a2e;
+}
+
+.seat.polaris.selected {
+  background: #1a1a2e;
+  color: #c9a84c;
+  box-shadow: 0 0 0 3px #c9a84c;
+}
+
+.seat.economy-plus.available {
+  background: #3b82f6;
+  color: white;
+}
+
+.seat.economy-plus.selected {
+  background: #1d4ed8;
+  color: white;
+  box-shadow: 0 0 0 3px #93c5fd;
+}
+
+/* Confirmation panel */
+.confirmation-panel {
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  height: fit-content;
+  position: sticky;
+  top: 32px;
+}
+
+.confirmation-panel h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #003087;
+  border-bottom: 2px solid #e8f0fe;
+  padding-bottom: 12px;
+}
+
+.no-selection {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+  padding: 32px 0;
+}
+
+.no-selection .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.seat-details {
+  display: none;
+}
+
+.seat-details.visible {
+  display: block;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f4f8;
+  font-size: 14px;
+}
+
+.detail-row .label {
+  color: #6b7280;
+}
+
+.detail-row .value {
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.price-row {
+  margin-top: 16px;
+  padding: 16px;
+  background: #e8f0fe;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-row .price {
+  font-size: 24px;
+  font-weight: 700;
+  color: #003087;
+}
+
+.price-row .price-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.confirm-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  background: #003087;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirm-btn:hover {
+  background: #002070;
+}
+
+.class-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.class-badge.polaris {
+  background: #1a1a2e;
+  color: #c9a84c;
+}
+
+.class-badge.economy-plus {
+  background: #003087;
+  color: white;
+}
+
+.class-badge.economy {
+  background: #e8f0fe;
+  color: #003087;
+}
+
+/* Seat column headers */
+.seat-headers {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 4px;
+}
+
+.seat-header {
+  width: 36px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.row-number-header {
+  width: 36px;
+}
