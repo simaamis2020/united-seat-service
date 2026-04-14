@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>United — Seat Selection</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <div class="header">
+    <h1>✈ United Airlines — Seat Selection</h1>
+    <div class="flight-info">{{ flight_info.number }} &nbsp;|&nbsp; {{ flight_info.origin }} → {{ flight_info.destination }} &nbsp;|&nbsp; {{ flight_info.aircraft }}</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#c9a84c;"></div>
+      <span>Polaris Business ($450)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#3b82f6;"></div>
+      <span>Economy Plus ($79)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#22c55e;"></div>
+      <span>Economy (included)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#e5e7eb;"></div>
+      <span>Taken</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#003087;"></div>
+      <span>Your selection</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Seat map -->
+    <div class="seat-map-container">
+      <h2>Select Your Seat</h2>
+
+      <!-- Column headers -->
+      <div class="seat-headers">
+        <div class="row-number-header"></div>
+        <div class="seat-header">A</div>
+        <div class="seat-header">B</div>
+        <div class="seat-header">C</div>
+        <div class="aisle"></div>
+        <div class="seat-header">D</div>
+        <div class="seat-header">E</div>
+        <div class="seat-header">F</div>
+      </div>
+
+      {% set prev_class = namespace(value=None) %}
+      {% for row_data in rows %}
+        {% if row_data.seat_class != prev_class.value %}
+          {% if row_data.seat_class == 'polaris' %}
+            <div class="cabin-label polaris">Polaris Business — Rows 1–5</div>
+          {% elif row_data.seat_class == 'economy-plus' %}
+            <div class="cabin-label economy-plus">Economy Plus — Rows 6–10</div>
+          {% else %}
+            <div class="cabin-label economy">Economy — Rows 11–30</div>
+          {% endif %}
+          {% set prev_class.value = row_data.seat_class %}
+        {% endif %}
+
+        <div class="row">
+          <div class="row-number">{{ row_data.row }}</div>
+          {% for seat in row_data.seats %}
+            {# Insert aisle gap between C and D seats #}
+            {% if loop.index == 4 %}
+              <div class="aisle"></div>
+            {% endif %}
+            <button
+              class="seat {{ seat.seat_class }} {{ seat.status }}"
+              data-row="{{ seat.row }}"
+              data-letter="{{ seat.letter }}"
+              data-class="{{ seat.seat_class }}"
+              data-price="{{ seat.price }}"
+              {% if seat.status == 'taken' %}disabled{% endif %}
+            >{{ seat.letter }}</button>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Confirmation panel -->
+    <div class="confirmation-panel">
+      <h2>Your Selection</h2>
+
+      <div class="no-selection" id="no-selection">
+        <div class="icon">💺</div>
+        <p>No seat selected.<br/>Click any available seat to begin.</p>
+      </div>
+
+      <div class="seat-details" id="seat-details">
+        <div class="detail-row">
+          <span class="label">Seat</span>
+          <span class="value" id="detail-seat">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Class</span>
+          <span class="value" id="detail-class">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Row</span>
+          <span class="value" id="detail-row">—</span>
+        </div>
+
+        <div class="price-row">
+          <div>
+            <div class="price-label">Upgrade price</div>
+            <div class="price" id="detail-price">$0</div>
+          </div>
+          <span class="class-badge" id="detail-badge">Economy</span>
+        </div>
+
+        <button class="confirm-btn" id="confirm-btn">Confirm Seat</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const noSelection = document.getElementById('no-selection');
+    const seatDetails = document.getElementById('seat-details');
+    const detailSeat  = document.getElementById('detail-seat');
+    const detailClass = document.getElementById('detail-class');
+    const detailRow   = document.getElementById('detail-row');
+    const detailPrice = document.getElementById('detail-price');
+    const detailBadge = document.getElementById('detail-badge');
+    const confirmBtn  = document.getElementById('confirm-btn');
+
+    let selectedButton = null;
+
+    // Format cabin class name for display
+    function formatClass(cls) {
+      if (cls === 'polaris') return 'Polaris Business';
+      if (cls === 'economy-plus') return 'Economy Plus';
+      return 'Economy';
+    }
+
+    // Update the confirmation panel
+    function showPanel(seat) {
+      noSelection.style.display = 'none';
+      seatDetails.classList.add('visible');
+      detailSeat.textContent  = seat.row + seat.letter;
+      detailClass.textContent = formatClass(seat.seat_class);
+      detailRow.textContent   = seat.row;
+      detailPrice.textContent = seat.price > 0 ? '$' + seat.price : 'Included';
+      detailBadge.className   = 'class-badge ' + seat.seat_class;
+      detailBadge.textContent = formatClass(seat.seat_class);
+    }
+
+    function hidePanel() {
+      noSelection.style.display = '';
+      seatDetails.classList.remove('visible');
+    }
+
+    // Handle seat button clicks
+    document.querySelectorAll('.seat:not([disabled])').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const row    = parseInt(this.dataset.row, 10);
+        const letter = this.dataset.letter;
+
+        fetch('/api/select', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ row, letter }),
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.error) { alert(data.error); return; }
+
+          const seat = data.seat;
+
+          // Deselect any previously highlighted button
+          if (selectedButton && selectedButton !== this) {
+            selectedButton.classList.remove('selected');
+            selectedButton.classList.add('available');
+          }
+
+          if (seat.status === 'selected') {
+            this.classList.remove('available');
+            this.classList.add('selected');
+            selectedButton = this;
+            showPanel(seat);
+          } else {
+            // Toggled off
+            this.classList.remove('selected');
+            this.classList.add('available');
+            selectedButton = null;
+            hidePanel();
+          }
+        })
+        .catch(err => console.error('Select error:', err));
+      });
+    });
+
+    // Confirm selection
+    confirmBtn.addEventListener('click', function () {
+      fetch('/api/confirm', { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { alert(data.error); return; }
+
+        if (selectedButton) {
+          selectedButton.classList.remove('selected');
+          selectedButton.classList.add('taken');
+          selectedButton.disabled = true;
+          selectedButton = null;
+        }
+        hidePanel();
+        alert('Seat ' + data.confirmed.id + ' confirmed! Enjoy your flight.');
+      })
+      .catch(err => console.error('Confirm error:', err));
+    });
+  </script>
+</body>
+</html>
