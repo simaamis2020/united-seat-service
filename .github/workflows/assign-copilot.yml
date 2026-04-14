@@ -1,0 +1,17 @@
+name: Auto-assign Copilot
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign to Copilot
+        env:
+          GH_TOKEN: ${{ secrets.COPILOT_ASSIGN_PAT }}
+        run: |
+          gh issue edit ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --add-assignee "@copilot"
