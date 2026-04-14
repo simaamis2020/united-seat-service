@@ -37,3 +37,4 @@ Opens at http://localhost:5000
 - Follow the existing color scheme defined in style.css
 - Seat map should use the .seat, .available, .taken, 
   .selected, .polaris, .economy-plus, .economy CSS classes
+# Deployed via GitHub Actions
