@@ -30,3 +30,10 @@ Python Flask
 python3 app.py
 ```
 Opens at http://localhost:5000
+
+## UI Guidelines
+- Use static/style.css for all styling
+- Do not use inline styles
+- Follow the existing color scheme defined in style.css
+- Seat map should use the .seat, .available, .taken, 
+  .selected, .polaris, .economy-plus, .economy CSS classes
