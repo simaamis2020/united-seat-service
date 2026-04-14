@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>United — Select Your Seat</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="header">
+  <h1>✈ United Airlines — Seat Selection</h1>
+  <span class="flight-info">Flight UA 2024 · SFO → ORD · Economy / Polaris</span>
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#c9a84c;"></div>
+    <span>Polaris Business ($450)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#3b82f6;"></div>
+    <span>Economy Plus ($79)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#22c55e;"></div>
+    <span>Economy (Free)</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#e5e7eb;border:1px solid #ccc;"></div>
+    <span>Taken</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="seat-map-container">
+    <h2>Select a Seat</h2>
+
+    <div class="seat-headers">
+      <div class="row-number-header"></div>
+      {% for letter in letters %}
+        <div class="seat-header">{{ letter }}</div>
+        {% if letter == 'C' %}<div class="seat-header"></div>{% endif %}
+      {% endfor %}
+    </div>
+
+    {% set ns = namespace(last_class=None) %}
+    {% for row in rows %}
+      {% set seat_class = seats[(row|string + 'A')]['seat_class'] %}
+      {% if seat_class != ns.last_class %}
+        {% set ns.last_class = seat_class %}
+        <div class="cabin-label {{ seat_class }}">
+          {% if seat_class == 'polaris' %}Polaris Business
+          {% elif seat_class == 'economy-plus' %}Economy Plus
+          {% else %}Economy{% endif %}
+        </div>
+      {% endif %}
+
+      <div class="row">
+        <div class="row-number">{{ row }}</div>
+        {% for letter in letters %}
+          {% set seat_id = row|string + letter %}
+          {% set seat = seats[seat_id] %}
+          {% if seat['available'] %}
+            {% set state = 'selected' if seat['selected'] else 'available' %}
+          {% else %}
+            {% set state = 'taken' %}
+          {% endif %}
+          <button
+            class="seat {{ seat['seat_class'] }} {{ state }}"
+            data-seat-id="{{ seat_id }}"
+            data-row="{{ row }}"
+            data-letter="{{ letter }}"
+            data-class="{{ seat['seat_class'] }}"
+            data-price="{{ seat['price'] }}"
+            {% if not seat['available'] %}disabled{% endif %}
+            onclick="selectSeat(this)"
+          >{{ letter }}</button>
+          {% if letter == 'C' %}<div class="aisle"></div>{% endif %}
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="confirmation-panel">
+    <h2>Your Selection</h2>
+    <div class="no-selection" id="no-selection">
+      <div class="icon">🪑</div>
+      <div>No seat selected</div>
+    </div>
+    <div class="seat-details" id="seat-details">
+      <div class="detail-row">
+        <span class="label">Seat</span>
+        <span class="value" id="detail-seat"></span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Row</span>
+        <span class="value" id="detail-row"></span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Class</span>
+        <span class="value">
+          <span class="class-badge" id="detail-class-badge"></span>
+        </span>
+      </div>
+      <div class="price-row">
+        <div>
+          <div class="price-label">Seat upgrade fee</div>
+          <div class="price" id="detail-price"></div>
+        </div>
+      </div>
+      <button class="confirm-btn" onclick="confirmSelection()">Confirm Seat</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedButton = null;
+
+  const CLASS_LABELS = {
+    'polaris': 'Polaris Business',
+    'economy-plus': 'Economy Plus',
+    'economy': 'Economy'
+  };
+
+  function selectSeat(btn) {
+    if (btn.classList.contains('taken')) return;
+
+    // Deselect previous
+    if (selectedButton && selectedButton !== btn) {
+      selectedButton.classList.remove('selected');
+      selectedButton.classList.add('available');
+    }
+
+    if (selectedButton === btn) {
+      btn.classList.remove('selected');
+      btn.classList.add('available');
+      selectedButton = null;
+      showNoSelection();
+      return;
+    }
+
+    btn.classList.remove('available');
+    btn.classList.add('selected');
+    selectedButton = btn;
+
+    const seatId = btn.dataset.seatId;
+    const row = btn.dataset.row;
+    const letter = btn.dataset.letter;
+    const seatClass = btn.dataset.class;
+    const price = parseInt(btn.dataset.price);
+
+    document.getElementById('no-selection').style.display = 'none';
+    const details = document.getElementById('seat-details');
+    details.classList.add('visible');
+
+    document.getElementById('detail-seat').textContent = seatId;
+    document.getElementById('detail-row').textContent = row;
+
+    const badge = document.getElementById('detail-class-badge');
+    badge.textContent = CLASS_LABELS[seatClass] || seatClass;
+    badge.className = 'class-badge ' + seatClass;
+
+    document.getElementById('detail-price').textContent = price === 0 ? 'Free' : '$' + price;
+  }
+
+  function showNoSelection() {
+    document.getElementById('no-selection').style.display = '';
+    document.getElementById('seat-details').classList.remove('visible');
+  }
+
+  function confirmSelection() {
+    if (!selectedButton) return;
+    const seatId = selectedButton.dataset.seatId;
+    fetch('/api/seats/' + seatId + '/select', { method: 'POST' })
+      .then(r => {
+        if (!r.ok) {
+          return r.json().then(d => { throw new Error(d.error || 'Request failed'); });
+        }
+        return r.json();
+      })
+      .then(() => {
+        selectedButton.classList.remove('selected', 'available');
+        selectedButton.classList.add('taken');
+        selectedButton.disabled = true;
+        selectedButton = null;
+        showNoSelection();
+        alert('Seat ' + seatId + ' confirmed!');
+      })
+      .catch(err => alert('Could not confirm seat: ' + err.message));
+  }
+</script>
+
+</body>
+</html>
