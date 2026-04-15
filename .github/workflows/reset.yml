@@ -15,4 +15,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             pkill -f "python3 app.py" || true
+            sleep 1
             echo "App stopped"
