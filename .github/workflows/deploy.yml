@@ -18,5 +18,10 @@ jobs:
           script: |
             cd ~/united-seat-service
             git pull origin main
-            sudo systemctl restart seatapp
-            echo "Deployed successfully"
+            sudo systemctl stop seatapp
+            if [ -f app.py ]; then
+              sudo systemctl start seatapp
+              echo "App started"
+            else
+              echo "No app.py — service stopped"
+            fi
