@@ -1,0 +1,18 @@
+name: Reset Demo Environment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stop app on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 100.53.12.150
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            pkill -f "python3 app.py" || true
+            echo "App stopped"
