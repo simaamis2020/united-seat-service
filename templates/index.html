@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>United Airlines — Seat Selection</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <div class="header">
+    <h1>✈ United Airlines — Seat Selection</h1>
+    <span class="flight-info">UA 1234 &nbsp;|&nbsp; SFO → ORD &nbsp;|&nbsp; Today</span>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot legend-polaris"></div>
+      <span>Polaris (rows 1–5)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-economy-plus"></div>
+      <span>Economy Plus (rows 6–10)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-available"></div>
+      <span>Available</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-taken"></div>
+      <span>Taken</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-selected"></div>
+      <span>Selected</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="seat-map-container">
+      <h2>Select Your Seat</h2>
+
+      <div class="seat-headers">
+        <div class="row-number-header"></div>
+        <div class="seat-header">A</div>
+        <div class="seat-header">B</div>
+        <div class="seat-header">C</div>
+        <div class="aisle"></div>
+        <div class="seat-header">D</div>
+        <div class="seat-header">E</div>
+        <div class="seat-header">F</div>
+      </div>
+
+      {% for row in rows %}
+
+        {% if row == 1 %}
+        <div class="cabin-label polaris">Polaris Business — Rows 1–5</div>
+        {% elif row == 6 %}
+        <div class="cabin-label economy-plus">Economy Plus — Rows 6–10</div>
+        {% elif row == 11 %}
+        <div class="cabin-label economy">Economy — Rows 11–30</div>
+        {% endif %}
+
+        <div class="row">
+          <div class="row-number">{{ row }}</div>
+
+          {% for seat in ['A', 'B', 'C'] %}
+            {% set s = seat_data[row][seat] %}
+            <button
+              class="seat {{ s.seat_class }} {% if s.taken %}taken{% else %}available{% endif %}"
+              data-seat-id="{{ s.id }}"
+              data-row="{{ row }}"
+              data-seat-letter="{{ seat }}"
+              data-seat-class="{{ s.seat_class }}"
+              data-class-label="{{ s.class_label }}"
+              data-price="{{ s.price }}"
+              {% if s.taken %}disabled{% endif %}
+              onclick="selectSeat(this)"
+            >{{ seat }}</button>
+          {% endfor %}
+
+          <div class="aisle"></div>
+
+          {% for seat in ['D', 'E', 'F'] %}
+            {% set s = seat_data[row][seat] %}
+            <button
+              class="seat {{ s.seat_class }} {% if s.taken %}taken{% else %}available{% endif %}"
+              data-seat-id="{{ s.id }}"
+              data-row="{{ row }}"
+              data-seat-letter="{{ seat }}"
+              data-seat-class="{{ s.seat_class }}"
+              data-class-label="{{ s.class_label }}"
+              data-price="{{ s.price }}"
+              {% if s.taken %}disabled{% endif %}
+              onclick="selectSeat(this)"
+            >{{ seat }}</button>
+          {% endfor %}
+        </div>
+
+      {% endfor %}
+    </div>
+
+    <div class="confirmation-panel">
+      <h2>Your Selection</h2>
+
+      <div class="no-selection" id="no-selection">
+        <div class="icon">💺</div>
+        <p>Click a seat on the map to select it</p>
+      </div>
+
+      <div class="seat-details" id="seat-details">
+        <div class="detail-row">
+          <span class="label">Seat</span>
+          <span class="value" id="detail-seat">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Row</span>
+          <span class="value" id="detail-row">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Class</span>
+          <span class="value" id="detail-class">—</span>
+        </div>
+        <div class="price-row">
+          <div>
+            <div class="price-label">Price</div>
+            <div class="price" id="detail-price">—</div>
+          </div>
+        </div>
+        <button class="confirm-btn" onclick="confirmSeat()">Confirm Seat</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    var selectedBtn = null;
+
+    function selectSeat(btn) {
+      if (btn.classList.contains('taken')) return;
+
+      // Clicking the same seat toggles deselection
+      if (selectedBtn === btn) {
+        btn.classList.remove('selected');
+        btn.classList.add('available');
+        selectedBtn = null;
+        document.getElementById('no-selection').style.display = '';
+        document.getElementById('seat-details').classList.remove('visible');
+        return;
+      }
+
+      // Deselect previous seat
+      if (selectedBtn) {
+        selectedBtn.classList.remove('selected');
+        selectedBtn.classList.add('available');
+      }
+
+      // Select new seat
+      btn.classList.remove('available');
+      btn.classList.add('selected');
+      selectedBtn = btn;
+
+      // Update confirmation panel
+      var row = btn.dataset.row;
+      var letter = btn.dataset.seatLetter;
+      var seatClass = btn.dataset.seatClass;
+      var classLabel = btn.dataset.classLabel;
+      var price = btn.dataset.price;
+
+      document.getElementById('detail-seat').textContent = row + letter;
+      document.getElementById('detail-row').textContent = row;
+      document.getElementById('detail-class').innerHTML =
+        '<span class="class-badge ' + seatClass + '">' + classLabel + '</span>';
+      document.getElementById('detail-price').textContent = price;
+
+      document.getElementById('no-selection').style.display = 'none';
+      document.getElementById('seat-details').classList.add('visible');
+    }
+
+    function confirmSeat() {
+      if (!selectedBtn) return;
+      var row = selectedBtn.dataset.row;
+      var letter = selectedBtn.dataset.seatLetter;
+      var classLabel = selectedBtn.dataset.classLabel;
+      var price = selectedBtn.dataset.price;
+      alert(
+        'Seat ' + row + letter + ' confirmed!\n' +
+        'Class: ' + classLabel + '\n' +
+        'Price: ' + price
+      );
+    }
+  </script>
+
+</body>
+</html>
