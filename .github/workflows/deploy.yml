@@ -16,12 +16,13 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            pkill -f "python3 app.py" || true
+            sudo systemctl stop seatapp || true
             cd ~/united-seat-service
             git pull origin main
-            sudo systemctl stop seatapp
             if [ -f app.py ]; then
               sudo systemctl start seatapp
-              echo "App started"
+              echo "App deployed and running"
             else
-              echo "No app.py — service stopped"
+              echo "No app.py found - app is down"
             fi
