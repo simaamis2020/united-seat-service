@@ -16,8 +16,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            pkill -f "python3 app.py" || true
             cd ~/united-seat-service
             git pull origin main
-            sudo systemctl restart seatapp || true
-            echo "Done"
+            sudo systemctl restart seatapp
+            echo "Deployed successfully"
