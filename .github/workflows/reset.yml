@@ -7,7 +7,7 @@ jobs:
   reset:
     runs-on: ubuntu-latest
     steps:
-      - name: Stop app on EC2
+      - name: Reset EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: 100.53.12.150
@@ -17,5 +17,8 @@ jobs:
             sudo systemctl disable seatapp
             sudo systemctl stop seatapp
             pkill -f "python3 app.py" || true
+            cd ~/united-seat-service
+            git fetch origin main
+            git reset --hard origin/main
             sleep 1
-            echo "App stopped and disabled"
+            echo "App stopped and repo reset"
