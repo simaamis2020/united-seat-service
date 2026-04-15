@@ -14,6 +14,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            sudo systemctl disable seatapp
+            sudo systemctl stop seatapp
             pkill -f "python3 app.py" || true
             sleep 1
-            echo "App stopped"
+            echo "App stopped and disabled"
