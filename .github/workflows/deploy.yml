@@ -15,15 +15,9 @@ jobs:
           host: 100.53.12.150
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          command_timeout: 60s
           script: |
             pkill -f "python3 app.py" || true
-            sudo systemctl stop seatapp || true
             cd ~/united-seat-service
             git pull origin main
-            if [ -f app.py ]; then
-              sudo systemctl start seatapp
-              echo "App deployed"
-            else
-              echo "App stopped - no code"
-            fi
+            sudo systemctl restart seatapp || true
+            echo "Done"
