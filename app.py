@@ -137,7 +137,7 @@ HTML = """<!DOCTYPE html>
         document.getElementById('detail-seat').textContent = btn.dataset.row + btn.dataset.col;
         document.getElementById('detail-row').textContent = btn.dataset.row;
 
-        var cls = btn.dataset.cls || btn.dataset['class'];
+        var cls = btn.dataset['class'];
         var clsLabel = btn.dataset.classLabel;
         var classEl = document.getElementById('detail-class');
         classEl.innerHTML = '<span class="class-badge ' + cls + '">' + clsLabel + '</span>';
@@ -158,7 +158,6 @@ HTML = """<!DOCTYPE html>
 
 
 def build_seat_map():
-    random.seed()
     seats_per_class = {
         'polaris': list(range(1, 6)),
         'economy-plus': list(range(6, 11)),
